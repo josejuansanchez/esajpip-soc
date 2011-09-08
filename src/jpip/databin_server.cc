@@ -96,10 +96,13 @@ namespace jpip
   {
 	/******/
 	if (!has_len)
-	  pending = 5000;
+	  pending = 4000;
 
+	cout << "[soc][GenerateChunk] has_len: " << has_len << endl;
 	cout << "[soc][GenerateChunk] pending: " << pending << endl;
 	/******/
+
+	int num_bytes;	// soc
 
     data_writer.SetBuffer(buff, min(pending, *len));
 
@@ -114,7 +117,7 @@ namespace jpip
       if(im_index->GetNumMetadatas() <= 0)
         WriteSegment<DataBinClass::META_DATA>(0, 0, FileSegment::Null);
       else {
-        int bin_offset = 0;
+    	int bin_offset = 0;
         bool last_metadata = false;
 
         for (int i = 0; i < im_index->GetNumMetadatas(); i++)
@@ -150,11 +153,22 @@ namespace jpip
       {
     	for (int i = range.first; i <= range.last; i++)
         {
-          WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
-          WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+          num_bytes = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
+          /*****/
+          //cout << "[soc][GenerateChunk] num_bytes. WriteSegment MAIN_HEADER: " << num_bytes << endl;
+          /*****/
+
+          num_bytes = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+          /*****/
+          //cout << "[soc][GenerateChunk] num_bytes. WriteSegment TILE_HEADER: " << num_bytes << endl;
+          /*****/
         }
 
         if(has_woi) {
+          /*****/
+          //cout << "[soc][GenerateChunk] has_woi: " << has_woi << endl;
+          /*****/
+
           int res;
           Packet packet;
           FileSegment segment;
@@ -169,6 +183,9 @@ namespace jpip
             last_packet = (packet.layer >= (im_index->GetCodingParameters()->num_layers - 1));
 
             res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
+            /*****/
+            //cout << "[soc][GenerateChunk] res. WriteSegment PRECINCT: " << res << endl;
+            /*****/
 
             if(res < 0) return false;
             else if(res > 0) {
@@ -189,13 +206,13 @@ namespace jpip
         pending = 0;
 
         /*****/
-    	cout << "[soc] XXX eof: " << eof << endl;
+    	//cout << "[soc][GenerateChunk] XXX eof: " << eof << endl;
     	/*****/
 
       } else {
 
     	/*****/
-    	cout << "[soc] *** eof: " << eof << endl;
+    	//cout << "[soc][GenerateChunk] *** eof: " << eof << endl;
     	/*****/
 
       	pending -= data_writer.GetCount();
@@ -218,7 +235,7 @@ namespace jpip
     if(*last) cache_model.Pack();
 
     /******/
-    cout << "[soc][GenerateChunk] DEBUG. data_writer: " << data_writer << endl;
+    //cout << "[soc][GenerateChunk] data_writer.GetCount(): " << data_writer.GetCount() << endl;
     /******/
 
     return data_writer;

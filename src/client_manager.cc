@@ -38,10 +38,6 @@ void ClientManager::Run(ClientInfo *client_info)
   ImageIndex::Ptr im_index;
   DataBinServer data_server;
 
-  /**************/
-  bool send_chunk = false;			// soc
-  /**************/
-
   string backup_file = cfg.caching_folder() +
       base::to_string(client_info->father_sock()) + ".backup";
 
@@ -158,11 +154,6 @@ void ClientManager::Run(ClientInfo *client_info)
             << flush;
 
           send_data = true;
-
-          /***********/
-          if(req.type == http::Request::GET)
-            send_chunk = true;					// soc
-          /***********/
         }
       }
 
@@ -175,35 +166,28 @@ void ClientManager::Run(ClientInfo *client_info)
     if(pclose)
       sock_stream << http::Response(500) << http::Protocol::CRLF << flush;
     else if(send_data) {
+      for(bool last = false; !last;) {
+        chunk_len = buf_len;
 
-      /**************/
-      if (send_chunk) {
-        cout << "[soc] SEND CHUNK..." << endl;
-
-        for(bool last = false; !last;) {
-          chunk_len = buf_len;
-
-          if(!data_server.GenerateChunk(buf, &chunk_len, &last)) {
-            ERROR("A new data chunk could not be generated");
-            pclose = true;
-            break;
-          }
-
-          if(chunk_len > 0) {
-            sock_stream << hex << chunk_len << dec << http::Protocol::CRLF << flush;
-
-            //LOG("Chunk of " << chunk_len << " bytes sent");
-            sock_stream->Send(buf, chunk_len);
-
-            sock_stream << http::Protocol::CRLF << flush;
-          }
-
-          /***/
-          cout << "[soc] chunk_len: " << chunk_len << endl;
-          /***/
+        if(!data_server.GenerateChunk(buf, &chunk_len, &last)) {
+          ERROR("A new data chunk could not be generated");
+          pclose = true;
+          break;
         }
+
+        if(chunk_len > 0) {
+          sock_stream << hex << chunk_len << dec << http::Protocol::CRLF << flush;
+
+          //LOG("Chunk of " << chunk_len << " bytes sent");
+          sock_stream->Send(buf, chunk_len);
+
+          sock_stream << http::Protocol::CRLF << flush;
+        }
+
+        /***/
+        cout << "[soc] chunk_len: " << chunk_len << endl;
+        /***/
       }
-      /**************/
 
       sock_stream
         << "0" << http::Protocol::CRLF

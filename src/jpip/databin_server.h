@@ -43,7 +43,7 @@ namespace jpip
     int current_idx;	///< Current codestream index
 
     /****/
-    bool has_len;	// soc
+    bool has_len;		// soc
     /****/
 
     /**
