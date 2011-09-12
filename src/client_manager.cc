@@ -38,7 +38,9 @@ void ClientManager::Run(ClientInfo *client_info)
   ImageIndex::Ptr im_index;
   DataBinServer data_server;
 
+  /****/
   bool req_between_chunk = false;
+  /****/
 
   string backup_file = cfg.caching_folder() +
       base::to_string(client_info->father_sock()) + ".backup";
@@ -192,6 +194,7 @@ void ClientManager::Run(ClientInfo *client_info)
         }
 
         /*********/
+        /*
         if(cfg.com_time_out() > 0) {
           if(sock_stream->WaitForInput(cfg.com_time_out() * 1000) == 0) {
             LOG("Communication time-out");
@@ -233,6 +236,7 @@ void ClientManager::Run(ClientInfo *client_info)
           last = true;
           break;
         }
+        */
         /*********/
       }
 
