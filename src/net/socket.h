@@ -258,6 +258,12 @@ namespace net
     bool ReceiveDescriptor(int *fd, int *aux = NULL);
 
     /**
+     *
+     */
+    int Peek(void *buf, int len);
+
+
+    /**
       Closes the socket.
     */
     void Close()
@@ -279,3 +285,4 @@ namespace net
 
 #endif	
 	
+

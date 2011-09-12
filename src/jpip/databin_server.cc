@@ -96,9 +96,9 @@ namespace jpip
   {
 	/******/
 	if (!has_len)
-	  pending = 1000;
+	  pending = 4000;
 
-	cout << "[DataBinServer][GenerateChunk] has_len: " << has_len << endl;
+	//cout << "[DataBinServer][GenerateChunk] has_len: " << has_len << endl;
 	//cout << "[DataBinServer][GenerateChunk] pending: " << pending << endl;
 	/******/
 
@@ -120,7 +120,7 @@ namespace jpip
     	int bin_offset = 0;
         bool last_metadata = false;
 
-        cout << "[DataBinServer][GenerateChunk] im_index->GetNumMetadatas(): " << im_index->GetNumMetadatas() << endl;
+        //cout << "[DataBinServer][GenerateChunk] im_index->GetNumMetadatas(): " << im_index->GetNumMetadatas() << endl;
 
         for (int i = 0; i < im_index->GetNumMetadatas(); i++)
         {
@@ -128,8 +128,8 @@ namespace jpip
           WriteSegment<DataBinClass::META_DATA>(0, 0, im_index->GetMetadata(i), bin_offset, last_metadata);
           bin_offset += im_index->GetMetadata(i).length;
 
-          cout << "[DataBinServer][GenerateChunk] bin_offset: " << bin_offset << endl;
-          cout << "[DataBinServer][GenerateChunk] im_index->GetMetadata(" << i << ").length: " << im_index->GetMetadata(i).length << endl;
+          //cout << "[DataBinServer][GenerateChunk] bin_offset: " << bin_offset << endl;
+          //cout << "[DataBinServer][GenerateChunk] im_index->GetMetadata(" << i << ").length: " << im_index->GetMetadata(i).length << endl;
 
           if (!last_metadata)
           {
@@ -156,24 +156,24 @@ namespace jpip
 
       if (!eof)
       {
-    	cout << "[DataBinServer][GenerateChunk] range.first: " << range.first << "\t range.last: " << range.last << endl;
+    	//cout << "[DataBinServer][GenerateChunk] range.first: " << range.first << "\t range.last: " << range.last << endl;
 
     	for (int i = range.first; i <= range.last; i++)
         {
           num_bytes = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
           /*****/
-          cout << "[DataBinServer][GenerateChunk] num_bytes. WriteSegment MAIN_HEADER: " << num_bytes << endl;
+          //cout << "[DataBinServer][GenerateChunk] num_bytes. WriteSegment MAIN_HEADER: " << num_bytes << endl;
           /*****/
 
           num_bytes = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
           /*****/
-          cout << "[DataBinServer][GenerateChunk] num_bytes. WriteSegment TILE_HEADER: " << num_bytes << endl;
+          //cout << "[DataBinServer][GenerateChunk] num_bytes. WriteSegment TILE_HEADER: " << num_bytes << endl;
           /*****/
         }
 
         if(has_woi) {
           /*****/
-          cout << "[DataBinServer][GenerateChunk] has_woi: " << has_woi << endl;
+          //cout << "[DataBinServer][GenerateChunk] has_woi: " << has_woi << endl;
           /*****/
 
           int res;

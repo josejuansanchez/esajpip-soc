@@ -157,4 +157,12 @@ namespace net
     return true;
   }
 
+  int Socket::Peek(void *buf, int len)
+  {
+	  PollFD poll_fd(sid, POLLIN);
+	  if(poll(&poll_fd, 1, 0) <= 0) return -1;
+	  return recv(sid, buf, len, MSG_PEEK);
+  }
+
+
 }

@@ -38,9 +38,7 @@ void ClientManager::Run(ClientInfo *client_info)
   ImageIndex::Ptr im_index;
   DataBinServer data_server;
 
-  /****/
   bool req_between_chunk = false;
-  /****/
 
   string backup_file = cfg.caching_folder() +
       base::to_string(client_info->father_sock()) + ".backup";
@@ -186,22 +184,21 @@ void ClientManager::Run(ClientInfo *client_info)
         if(chunk_len > 0) {
           sock_stream << hex << chunk_len << dec << http::Protocol::CRLF << flush;
 
-          cout << "[ClientManager][Run] chunk_len: " << chunk_len << endl;
+          //cout << "[ClientManager][Run] chunk_len (hex): " << hex << chunk_len << endl;
           //LOG("Chunk of " << chunk_len << " bytes sent");
           sock_stream->Send(buf, chunk_len);
 
           sock_stream << http::Protocol::CRLF << flush;
         }
 
-        /*********/
-        /*
-        if(cfg.com_time_out() > 0) {
-          if(sock_stream->WaitForInput(cfg.com_time_out() * 1000) == 0) {
-            LOG("Communication time-out");
-            sock_stream->Close();
-            break;
+        cout << "[ClientManager][Run] Peek: " << dec << sock_stream->Peek(buf, chunk_len) << endl;
+
+        /****/
+        if(sock_stream->Peek(buf, chunk_len) == -1) {
+        	  continue;
+          } else {
+        	  cerr << "[ClientManager][Run] New Request " << endl;
           }
-        }
 
         req_between_chunk = false;
         if(!(sock_stream >> req).good()) {
@@ -236,8 +233,7 @@ void ClientManager::Run(ClientInfo *client_info)
           last = true;
           break;
         }
-        */
-        /*********/
+        /****/
       }
 
       sock_stream
