@@ -96,10 +96,10 @@ namespace jpip
   {
 	/******/
 	if (!has_len)
-	  pending = 4000;
+	  pending = 1000;
 
-	cout << "[soc][GenerateChunk] has_len: " << has_len << endl;
-	cout << "[soc][GenerateChunk] pending: " << pending << endl;
+	cout << "[DataBinServer][GenerateChunk] has_len: " << has_len << endl;
+	//cout << "[DataBinServer][GenerateChunk] pending: " << pending << endl;
 	/******/
 
 	int num_bytes;	// soc
@@ -120,11 +120,16 @@ namespace jpip
     	int bin_offset = 0;
         bool last_metadata = false;
 
+        cout << "[DataBinServer][GenerateChunk] im_index->GetNumMetadatas(): " << im_index->GetNumMetadatas() << endl;
+
         for (int i = 0; i < im_index->GetNumMetadatas(); i++)
         {
           last_metadata = (i == (im_index->GetNumMetadatas() - 1));
           WriteSegment<DataBinClass::META_DATA>(0, 0, im_index->GetMetadata(i), bin_offset, last_metadata);
           bin_offset += im_index->GetMetadata(i).length;
+
+          cout << "[DataBinServer][GenerateChunk] bin_offset: " << bin_offset << endl;
+          cout << "[DataBinServer][GenerateChunk] im_index->GetMetadata(" << i << ").length: " << im_index->GetMetadata(i).length << endl;
 
           if (!last_metadata)
           {
@@ -151,22 +156,24 @@ namespace jpip
 
       if (!eof)
       {
+    	cout << "[DataBinServer][GenerateChunk] range.first: " << range.first << "\t range.last: " << range.last << endl;
+
     	for (int i = range.first; i <= range.last; i++)
         {
           num_bytes = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
           /*****/
-          //cout << "[soc][GenerateChunk] num_bytes. WriteSegment MAIN_HEADER: " << num_bytes << endl;
+          cout << "[DataBinServer][GenerateChunk] num_bytes. WriteSegment MAIN_HEADER: " << num_bytes << endl;
           /*****/
 
           num_bytes = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
           /*****/
-          //cout << "[soc][GenerateChunk] num_bytes. WriteSegment TILE_HEADER: " << num_bytes << endl;
+          cout << "[DataBinServer][GenerateChunk] num_bytes. WriteSegment TILE_HEADER: " << num_bytes << endl;
           /*****/
         }
 
         if(has_woi) {
           /*****/
-          //cout << "[soc][GenerateChunk] has_woi: " << has_woi << endl;
+          cout << "[DataBinServer][GenerateChunk] has_woi: " << has_woi << endl;
           /*****/
 
           int res;
@@ -184,7 +191,7 @@ namespace jpip
 
             res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
             /*****/
-            //cout << "[soc][GenerateChunk] res. WriteSegment PRECINCT: " << res << endl;
+            //cout << "[DataBinServer][GenerateChunk] res. WriteSegment PRECINCT: " << res << endl;
             /*****/
 
             if(res < 0) return false;
@@ -206,13 +213,13 @@ namespace jpip
         pending = 0;
 
         /*****/
-    	//cout << "[soc][GenerateChunk] XXX eof: " << eof << endl;
+    	//cout << "[DataBinServer][GenerateChunk] XXX eof: " << eof << endl;
     	/*****/
 
       } else {
 
     	/*****/
-    	//cout << "[soc][GenerateChunk] *** eof: " << eof << endl;
+    	//cout << "[DataBinServer][GenerateChunk] *** eof: " << eof << endl;
     	/*****/
 
       	pending -= data_writer.GetCount();
@@ -235,7 +242,7 @@ namespace jpip
     if(*last) cache_model.Pack();
 
     /******/
-    //cout << "[soc][GenerateChunk] data_writer.GetCount(): " << data_writer.GetCount() << endl;
+    //cout << "[DataBinServer][GenerateChunk] data_writer.GetCount(): " << data_writer.GetCount() << endl;
     /******/
 
     return data_writer;

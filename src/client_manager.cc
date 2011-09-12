@@ -166,6 +166,7 @@ void ClientManager::Run(ClientInfo *client_info)
     if(pclose)
       sock_stream << http::Response(500) << http::Protocol::CRLF << flush;
     else if(send_data) {
+
       for(bool last = false; !last;) {
         chunk_len = buf_len;
 
@@ -178,15 +179,39 @@ void ClientManager::Run(ClientInfo *client_info)
         if(chunk_len > 0) {
           sock_stream << hex << chunk_len << dec << http::Protocol::CRLF << flush;
 
+          cout << "[ClientManager][Run] chunk_len: " << chunk_len << endl;
           //LOG("Chunk of " << chunk_len << " bytes sent");
           sock_stream->Send(buf, chunk_len);
 
           sock_stream << http::Protocol::CRLF << flush;
         }
 
-        /***/
-        cout << "[soc] chunk_len: " << chunk_len << endl;
-        /***/
+        if((sock_stream >> req).good()) {
+        	cout << " Recibe una nueva petición " << endl;
+        	last = true;
+        	break;
+
+            http::Header header;
+            int content_length = 0;
+
+            while((sock_stream >> header).good()) {
+              if(header == http::Header::ContentLength()) {
+                content_length = atoi(header.value.c_str());
+              }
+            }
+
+            if(req.type == http::Request::POST) {
+              stringstream body;
+              sock_stream.clear();
+
+              while(content_length--)
+                body.put((char)sock_stream.get());
+
+              req.ParseParameters(body);
+            }
+
+            sock_stream.clear();
+        }
       }
 
       sock_stream
