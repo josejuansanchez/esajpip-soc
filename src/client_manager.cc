@@ -172,6 +172,7 @@ void ClientManager::Run(ClientInfo *client_info)
       sock_stream << http::Response(500) << http::Protocol::CRLF << flush;
     else if(send_data) {
 
+      int cont = 0;
       for(bool last = false; !last;) {
         chunk_len = buf_len;
 
@@ -184,14 +185,18 @@ void ClientManager::Run(ClientInfo *client_info)
         if(chunk_len > 0) {
           sock_stream << hex << chunk_len << dec << http::Protocol::CRLF << flush;
 
-          //cout << "[ClientManager][Run] chunk_len (hex): " << hex << chunk_len << endl;
+          cont++;
+          cout << "[ClientManager][Run][" << dec << cont << "] chunk_len (hex): " << hex << chunk_len << endl;
           //LOG("Chunk of " << chunk_len << " bytes sent");
           sock_stream->Send(buf, chunk_len);
 
           sock_stream << http::Protocol::CRLF << flush;
         }
 
-        cout << "[ClientManager][Run] Peek: " << dec << sock_stream->Peek(buf, chunk_len) << endl;
+        //cout << "[ClientManager][Run] Peek: " << dec << sock_stream->Peek(buf, chunk_len) << endl;
+        //cout << "Begin Peek" << endl << flush;
+        //int out = sock_stream->Peek(buf, chunk_len);
+        //cout << "End Peek. out: " << out << endl << flush;
 
         /****/
         if(sock_stream->Peek(buf, chunk_len) == -1) {
