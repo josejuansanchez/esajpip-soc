@@ -52,8 +52,8 @@ void ClientManager::Run(ClientInfo *client_info)
   {
     LOG("Waiting for a request ...");
 
-    if (!req_between_chunk)
-    {
+    //if (!req_between_chunk)
+    //{
       if(cfg.com_time_out() > 0) {
         if(sock_stream->WaitForInput(cfg.com_time_out() * 1000) == 0) {
           LOG("Communication time-out");
@@ -90,7 +90,7 @@ void ClientManager::Run(ClientInfo *client_info)
 
         sock_stream.clear();
       }
-    }
+    //}
 
     pclose = true;
     send_data = false;
@@ -193,6 +193,8 @@ void ClientManager::Run(ClientInfo *client_info)
           sock_stream << http::Protocol::CRLF << flush;
         }
 
+        //sleep(1);
+
         //cout << "[ClientManager][Run] Peek: " << dec << sock_stream->Peek(buf, chunk_len) << endl;
         //cout << "Begin Peek" << endl << flush;
         //int out = sock_stream->Peek(buf, chunk_len);
@@ -201,42 +203,11 @@ void ClientManager::Run(ClientInfo *client_info)
         /****/
         if(sock_stream->Peek(buf, chunk_len) == -1) {
         	  continue;
-          } else {
-        	  cerr << "[ClientManager][Run] New Request " << endl;
-          }
-
-        req_between_chunk = false;
-        if(!(sock_stream >> req).good()) {
-          if(sock_stream->IsValid()) LOG("Incorrect request received");
-          else LOG("Connection closed by the client");
-          sock_stream->Close();
-          break;
-
         } else {
-          http::Header header;
-          int content_length = 0;
-
-          while((sock_stream >> header).good()) {
-            if(header == http::Header::ContentLength()) {
-              content_length = atoi(header.value.c_str());
-            }
-          }
-
-          if(req.type == http::Request::POST) {
-            stringstream body;
-            sock_stream.clear();
-
-            while(content_length--)
-              body.put((char)sock_stream.get());
-
-            req.ParseParameters(body);
-          }
-
-          sock_stream.clear();
-
-          req_between_chunk = true;
-          last = true;
-          break;
+        	  cerr << "[ClientManager][Run] New Request " << endl;
+              req_between_chunk = true;
+              last = true;				// Revisar
+              break;
         }
         /****/
       }
