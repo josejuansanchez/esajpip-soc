@@ -16,6 +16,7 @@
 #include "jpeg2000/range.h"
 #include "jpeg2000/image_index.h"
 
+#include "app_config.h"
 
 namespace jpip
 {
@@ -43,7 +44,8 @@ namespace jpip
     int current_idx;	///< Current codestream index
 
     /****/
-    bool has_len;		// soc
+    //AppConfig& cfg;	///< Application configuration
+    bool has_len;		//< <code>true</code> if the last request contained a "len" parameter
     /****/
 
     /**
@@ -60,6 +62,10 @@ namespace jpip
 
     enum {
       MINIMUM_SPACE = 60		///< Minimum space in the chunk
+    };
+
+    enum {
+      REQUEST_LEN_SIZE = 4000	///< The length in bytes of a JPIP request
     };
 
     /**

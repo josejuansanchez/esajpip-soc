@@ -41,6 +41,7 @@ bool AppConfig::Load(const char *file_name)
     root["general"].lookupValue("logging", logging_);
     root["general"].lookupValue("max_chunk_size", max_chunk_size_);
     root["general"].lookupValue("cache_max_time", cache_max_time_);
+    //root["general"].lookupValue("request_len_size", request_len_size_);
   }
   catch (...)
   {

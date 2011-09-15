@@ -38,8 +38,6 @@ void ClientManager::Run(ClientInfo *client_info)
   ImageIndex::Ptr im_index;
   DataBinServer data_server;
 
-  bool req_between_chunk = false;
-
   string backup_file = cfg.caching_folder() +
       base::to_string(client_info->father_sock()) + ".backup";
 
@@ -190,19 +188,10 @@ void ClientManager::Run(ClientInfo *client_info)
           sock_stream << http::Protocol::CRLF << flush;
         }
 
-        //sleep(1);
-
-        //cout << "[ClientManager][Run] Peek: " << dec << sock_stream->Peek(buf, chunk_len) << endl;
-        //cout << "Begin Peek" << endl << flush;
-        //int out = sock_stream->Peek(buf, chunk_len);
-        //cout << "End Peek. out: " << out << endl << flush;
-
         /****/
-        if(sock_stream->Peek(buf, chunk_len) == -1) {
-        	  continue;
-        } else {
-        	  cerr << "[ClientManager][Run] New Request " << endl;
-              break;
+        if(sock_stream->Peek(buf, chunk_len) != -1) {
+          cout << "[ClientManager][Run] New Request " << endl;
+          break;
         }
         /****/
       }
