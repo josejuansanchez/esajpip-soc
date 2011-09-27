@@ -45,7 +45,9 @@ namespace jpip
 
     /****/
     //AppConfig& cfg;	///< Application configuration
-    bool has_len;		//< <code>true</code> if the last request contained a "len" parameter
+    bool has_len;		///< <code>true</code> if the last request contained a "len" parameter
+
+    uint64_t sum;
     /****/
 
     /**
@@ -82,6 +84,8 @@ namespace jpip
     {
       int cached = cache_model.GetDataBin<BIN_CLASS>(num_codestream, id);
       int res = 1, seg_cached = cached - offset;
+
+      //cout << dec << "# cs: " << num_codestream << "\t id: " << id << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached << "\t segment.length: " << segment.length << endl;
 
       if((cached != INT_MAX) && (((int)segment.length - seg_cached) >= 0)) {
         int free = data_writer.GetFree() - MINIMUM_SPACE;
@@ -160,6 +164,10 @@ namespace jpip
       end_woi_ = false;
       metareq = false;
       current_idx = 0;
+      /****/
+      has_len = false;
+      sum = 0;
+      /****/
     }
 
     /**

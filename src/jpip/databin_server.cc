@@ -12,6 +12,11 @@ namespace jpip
     has_woi = false;
     im_index = image_index;
 
+    /****/
+    has_len = false;
+    sum = 0;
+    /****/
+
     file = File::Ptr(new File());
 
     if(!file->OpenForReading(im_index->GetPathName())) return false;
@@ -65,6 +70,10 @@ namespace jpip
         range = new_range;
         current_idx = range.first;
 
+        /****/
+        //cout << "[SetRequest] range.Length(): " << range.Length() << endl;
+        /****/
+
         for(int i = 0; i < range.Length(); i++) {
           int idx = range.GetItem(i);
 
@@ -80,8 +89,6 @@ namespace jpip
     if(req.mask.items.len) {
       pending = req.length_response;
       has_len = true;
-    } else {
-      has_len = false;
     }
 
     if(reset_woi) {
@@ -149,8 +156,10 @@ namespace jpip
       {
     	for (int i = range.first; i <= range.last; i++)
         {
-          WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
-          WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+          int res = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
+          //cout << "res (WriteSegment): " << res << endl;
+          res = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+          //cout << "res (WriteSegment): " << res << endl;
         }
 
         if(has_woi) {
@@ -159,6 +168,10 @@ namespace jpip
           FileSegment segment;
           int bin_id, bin_offset;
           bool last_packet = false;
+
+          /****/
+          uint64_t BYTES_PER_FRAME = 4086;
+          /****/
 
           while(data_writer && !eof) {
             packet = woi_composer.GetCurrentPacket();
@@ -169,6 +182,34 @@ namespace jpip
 
             res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
 
+            /****/
+            if (res > 0)
+            {
+              //cout << "idx: " << current_idx << "\tR: " << packet.resolution << "\tX: " << packet.precinct_xy.x << "\tY: " << packet.precinct_xy.y;
+              //cout << "\tC: " << packet.component << "\tL: " << packet.layer << "\tsegment.length: " << segment.length;
+              //cout << "\tres: " << res << endl;
+              //cout << "data_writer.GetCount(): " << data_writer.GetCount() << endl;
+              sum = sum + data_writer.GetCount();
+            }
+            /****/
+
+            if(res < 0) return false;
+            else if(res > 0) {
+              if (current_idx != range.last) {
+            	  if(sum >= BYTES_PER_FRAME) {
+            		  //cout << "\idx: " << current_idx << "\tsum: " << sum << endl;
+            		  current_idx++;
+                	  sum = 0;
+            	  }
+              }
+              else
+              {
+                if(!woi_composer.GetNextPacket()) break;
+                else current_idx = range.first;
+              }
+            }
+
+            /*
             if(res < 0) return false;
             else if(res > 0) {
               if (current_idx != range.last) current_idx++;
@@ -178,6 +219,7 @@ namespace jpip
                 else current_idx = range.first;
               }
             }
+		    */
           }
         }
       }
