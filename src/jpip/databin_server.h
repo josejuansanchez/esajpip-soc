@@ -80,15 +80,19 @@ namespace jpip
      * @return The number of bytes of the data-bin written, 0 if the EOF was reached
      * or -1 if an error was generated.
      */
-    template<int BIN_CLASS> int WriteSegment(int num_codestream, int id, FileSegment segment, int offset = 0, bool last = true)
+    template<int BIN_CLASS> int WriteSegment(int num_codestream, int id, FileSegment segment, int offset = 0, bool last = true, bool DEBUG = false)
     {
       int cached = cache_model.GetDataBin<BIN_CLASS>(num_codestream, id);
       int res = 1, seg_cached = cached - offset;
 
-      //cout << dec << "# cs: " << num_codestream << "\t id: " << id << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached << "\t segment.length: " << segment.length << endl;
-
       if((cached != INT_MAX) && (((int)segment.length - seg_cached) >= 0)) {
         int free = data_writer.GetFree() - MINIMUM_SPACE;
+
+        if (DEBUG) {
+          //cout << "[WriteSegment] data_writer.GetFree(): " << data_writer.GetFree();
+          //cout << "\tdata_writer.GetCount(): " << data_writer.GetCount() << endl;
+          cout << "[WriteSegment] free: " << free << endl;
+        }
 
         if(free < 0) {
           eof = true;
@@ -113,6 +117,14 @@ namespace jpip
           if(!data_writer.Write(id, cached, *file_ptr, segment, last)) res = -1;
           else cache_model.AddToDataBin<BIN_CLASS>(num_codestream, id, segment.length, last);
         }
+      }
+
+      if (DEBUG) {
+        cout << dec << "[WriteSegment] # cs: " << num_codestream << "\t id: " << id;
+        cout << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached;
+        cout << "\t segment.length: " << segment.length << "\t res: " << res << endl;
+        //cout << "[WriteSegment] data_writer.GetFree(): " << data_writer.GetFree();
+        //cout << "\tdata_writer.GetCount(): " << data_writer.GetCount() << endl;
       }
 
       return res;

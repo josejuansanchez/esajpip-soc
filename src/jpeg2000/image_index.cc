@@ -163,7 +163,12 @@ namespace jpeg2000
 
     if (hyper_links.size()>0)
     {
+    	//cout << "\n[GetPacket] hyper_links.size > 0" << endl;
+
     	if(packet.resolution > hyper_links[num_codestream]->max_resolution.back()) {
+
+    		//cout << "[GetPacket] packet.resolution: " << packet.resolution << "\th.m.back: " << hyper_links[num_codestream]->max_resolution.back() << endl;
+
     		if(!hyper_links[num_codestream]->BuildIndex(0,packet.resolution))
     			ERROR("The packet index could not be created");
     		hyper_links[num_codestream]->max_resolution.back() = packet.resolution;
@@ -182,6 +187,8 @@ namespace jpeg2000
     //PacketIndex& packet_index = packet_indexes[num_codestream];
     int idx = coding_parameters->GetProgressionIndex(packet);
     segment = packet_index[idx];
+
+    cout << dec << "[GetPacket] num_codestream: " << num_codestream << "\tidx: " << idx << "\tsegment: " << segment.length << endl;
 
     if(offset != NULL) {
     	*offset = 0;

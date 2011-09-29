@@ -70,10 +70,6 @@ namespace jpip
         range = new_range;
         current_idx = range.first;
 
-        /****/
-        //cout << "[SetRequest] range.Length(): " << range.Length() << endl;
-        /****/
-
         for(int i = 0; i < range.Length(); i++) {
           int idx = range.GetItem(i);
 
@@ -107,7 +103,11 @@ namespace jpip
 	  pending = REQUEST_LEN_SIZE;
     /****/
 
-    data_writer.SetBuffer(buff, min(pending, *len));
+    /****/
+    uint64_t BYTES_PER_FRAME = 20000;
+    /****/
+
+	data_writer.SetBuffer(buff, min(pending, *len));
 
     if(pending > 0) {
       eof = false;
@@ -154,53 +154,59 @@ namespace jpip
 
       if (!eof)
       {
+    	// TODO: Optimize
     	for (int i = range.first; i <= range.last; i++)
         {
-          int res = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
-          //cout << "res (WriteSegment): " << res << endl;
-          res = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
-          //cout << "res (WriteSegment): " << res << endl;
+          WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
+          WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
         }
 
         if(has_woi) {
           int res;
-          Packet packet;
+          //Packet packet;
+          Packet *packet_list = new Packet[range.Length()];
           FileSegment segment;
           int bin_id, bin_offset;
           bool last_packet = false;
 
-          /****/
-          uint64_t BYTES_PER_FRAME = 4086;
-          /****/
-
           while(data_writer && !eof) {
-            packet = woi_composer.GetCurrentPacket();
+            //packet= woi_composer.GetCurrentPacket();
+            packet_list[current_idx]= woi_composer.GetCurrentPacket();
 
-            segment = im_index->GetPacket(current_idx, packet, &bin_offset);
-            bin_id = im_index->GetCodingParameters()->GetPrecinctDataBinId(packet);
-            last_packet = (packet.layer >= (im_index->GetCodingParameters()->num_layers - 1));
+            //segment = im_index->GetPacket(current_idx, packet, &bin_offset);
+            segment = im_index->GetPacket(current_idx, packet_list[current_idx], &bin_offset);
 
-            res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
+            //bin_id = im_index->GetCodingParameters()->GetPrecinctDataBinId(packet);
+            bin_id = im_index->GetCodingParameters()->GetPrecinctDataBinId(packet_list[current_idx]);
+
+            //last_packet = (packet.layer >= (im_index->GetCodingParameters()->num_layers - 1));
+            last_packet = (packet_list[current_idx].layer >= (im_index->GetCodingParameters()->num_layers - 1));
+
+            // First packet
+            //if ((current_idx==range.first) && (packet.resolution==0) &&
+            //	(packet.precinct_xy.x==0) && (packet.precinct_xy.y==0) && (packet.component==0) && (packet.layer==0)) {
+            //  sum = 0;
+            //}
 
             /****/
-            if (res > 0)
-            {
-              //cout << "idx: " << current_idx << "\tR: " << packet.resolution << "\tX: " << packet.precinct_xy.x << "\tY: " << packet.precinct_xy.y;
-              //cout << "\tC: " << packet.component << "\tL: " << packet.layer << "\tsegment.length: " << segment.length;
-              //cout << "\tres: " << res << endl;
-              //cout << "data_writer.GetCount(): " << data_writer.GetCount() << endl;
-              sum = sum + data_writer.GetCount();
-            }
+            res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet, true);
             /****/
+            //res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
+
+            //cout << dec << "\t[while] #: " << current_idx << "\tR: " << packet.resolution << "\tX: " << packet.precinct_xy.x << "\tY: " << packet.precinct_xy.y;
+            //cout << "\tC: " << packet.component << "\tL: " << packet.layer << "\t[" << data_writer.GetCount() << "]" << "\t res: " << res;
+            //cout << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
+
+            cout << dec << "\t[while] #: " << current_idx << "\tR: " << packet_list[current_idx].resolution << "\tX: " << packet_list[current_idx].precinct_xy.x << "\tY: " << packet_list[current_idx].precinct_xy.y;
+            cout << "\tC: " << packet_list[current_idx].component << "\tL: " << packet_list[current_idx].layer << "\t[" << data_writer.GetCount() << "]" << "\t res: " << res;
+            cout << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
 
             if(res < 0) return false;
             else if(res > 0) {
               if (current_idx != range.last) {
-            	  if(sum >= BYTES_PER_FRAME) {
-            		  //cout << "\idx: " << current_idx << "\tsum: " << sum << endl;
-            		  current_idx++;
-                	  sum = 0;
-            	  }
+                current_idx++;
+                cout << dec << "\t** " << current_idx << " ************************** [" << sum << "]" << endl;
+                sum = 0;
               }
               else
               {
@@ -221,10 +227,14 @@ namespace jpip
             }
 		    */
           }
+          /****/
+          sum = sum + data_writer.GetCount();
+          cout << dec << " #### [" << sum << "/" << segment.length << "] ####" << endl;
+          /****/
         }
       }
 
-      if(!eof) {
+       if(!eof) {
         data_writer.WriteEOR(EOR::WINDOW_DONE);
         end_woi_ = true;
         pending = 0;
@@ -247,6 +257,11 @@ namespace jpip
     *last = (pending <= 0);
 
     if(*last) cache_model.Pack();
+
+    /****/
+    cout << dec << "\t[return][" << data_writer.GetCount() << "]" << hex << " Hex: [" << data_writer.GetCount() << "]";
+    cout << "\tdata_writer: " << data_writer << "\teof: " << eof << endl;
+    /****/
 
     return data_writer;
   }
