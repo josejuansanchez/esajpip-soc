@@ -188,8 +188,6 @@ void ClientManager::Run(ClientInfo *client_info)
           sock_stream << http::Protocol::CRLF << flush;
         }
 
-        //sleep(1);
-
         /****/
         if(sock_stream->Peek(buf, chunk_len) != -1) {
           cout << "[ClientManager][Run] New Request " << endl;

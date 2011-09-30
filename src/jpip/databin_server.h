@@ -44,12 +44,8 @@ namespace jpip
     int current_idx;	///< Current codestream index
 
     /****/
-    //AppConfig& cfg;	///< Application configuration
     bool has_len;		///< <code>true</code> if the last request contained a "len" parameter
-
     uint64_t sum;
-
-    Packet *packet_list;
     /****/
 
     /**
@@ -60,7 +56,8 @@ namespace jpip
 
     CacheModel cache_model;		///< Cache model of the client
     vector<File::Ptr> files;	///< List of files (for hyperlinked JPX files)
-    WOIComposer woi_composer;	///< WOI composer for determining the packets
+    //WOIComposer woi_composer;	///< WOI composer for determining the packets
+    WOIComposer *woi_composer;	///< WOI composer for determining the packets
     ImageIndex::Ptr im_index;	///< Pointer to the associated image index
     DataBinWriter data_writer;	///< Data-bin writer for generating the chunks
 
@@ -90,11 +87,11 @@ namespace jpip
       if((cached != INT_MAX) && (((int)segment.length - seg_cached) >= 0)) {
         int free = data_writer.GetFree() - MINIMUM_SPACE;
 
+        /****/
         if (DEBUG) {
-          //cout << "[WriteSegment] data_writer.GetFree(): " << data_writer.GetFree();
-          //cout << "\tdata_writer.GetCount(): " << data_writer.GetCount() << endl;
           cout << "[WriteSegment] free: " << free << endl;
         }
+        /****/
 
         if(free < 0) {
           eof = true;
@@ -121,13 +118,13 @@ namespace jpip
         }
       }
 
+      /****/
       if (DEBUG) {
         cout << dec << "[WriteSegment] # cs: " << num_codestream << "\t id: " << id;
         cout << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached;
         cout << "\t segment.length: " << segment.length << "\t res: " << res << endl;
-        //cout << "[WriteSegment] data_writer.GetFree(): " << data_writer.GetFree();
-        //cout << "\tdata_writer.GetCount(): " << data_writer.GetCount() << endl;
       }
+      /****/
 
       return res;
     }

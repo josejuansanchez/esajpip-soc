@@ -28,7 +28,6 @@ private:
   int max_connections_;		///< Maximum number of connections
   int com_time_out_;		///< Connection time-out
   int cache_max_time_;		///< Maximum time for the cache files
-  //int request_len_size_;		///< The length in bytes of a JPIP request
 
 public:
   /**
@@ -46,7 +45,6 @@ public:
     max_connections_ = 0;
     cache_max_time_ = 0;
     com_time_out_ = -1;
-    //request_len_size_ = 0;
   }
 
   /**
@@ -70,7 +68,6 @@ public:
     out << "\tGeneral:" << endl;
     out << "\t\tLogging: " << (cfg.logging_ == 1 ? "yes" : "no") << endl;
     out << "\t\tChunk max. size: "<< cfg.max_chunk_size_ << endl;
-    //out << "\t\tRequest len size: "<< cfg.request_len_size_ << endl;
     return out;
   }
 
@@ -154,16 +151,6 @@ public:
   {
     return cache_max_time_;
   }
-
-  /**
-   * Returns the length in bytes of a JPIP request
-   */
-  /*
-  int request_len_size() const
-  {
-	  return request_len_size_;
-  }
-  */
 
   virtual ~AppConfig()
   {
