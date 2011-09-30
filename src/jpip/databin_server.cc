@@ -15,6 +15,7 @@ namespace jpip
     /****/
     has_len = false;
     sum = 0;
+    delete []packet_list;
     /****/
 
     file = File::Ptr(new File());
@@ -92,6 +93,10 @@ namespace jpip
       woi_composer.Reset(woi, *im_index);
     }
 
+    /****/
+    packet_list = new Packet[range.Length()];
+    /****/
+
     return res;
   }
 	
@@ -164,14 +169,17 @@ namespace jpip
         if(has_woi) {
           int res;
           //Packet packet;
-          Packet *packet_list = new Packet[range.Length()];
+          //Packet *packet_list = new Packet[range.Length()];
           FileSegment segment;
           int bin_id, bin_offset;
           bool last_packet = false;
 
           while(data_writer && !eof) {
             //packet= woi_composer.GetCurrentPacket();
-            packet_list[current_idx]= woi_composer.GetCurrentPacket();
+            //packet_list[current_idx]= woi_composer.GetCurrentPacket();
+
+            cout << dec << "\n[GetCurrentPacket] #: " << current_idx << "\tR: " << packet_list[current_idx].resolution << "\tX: " << packet_list[current_idx].precinct_xy.x << "\tY: " << packet_list[current_idx].precinct_xy.y;
+            cout << "\tC: " << packet_list[current_idx].component << "\tL: " << packet_list[current_idx].layer << endl;
 
             //segment = im_index->GetPacket(current_idx, packet, &bin_offset);
             segment = im_index->GetPacket(current_idx, packet_list[current_idx], &bin_offset);
@@ -197,22 +205,24 @@ namespace jpip
             //cout << "\tC: " << packet.component << "\tL: " << packet.layer << "\t[" << data_writer.GetCount() << "]" << "\t res: " << res;
             //cout << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
 
-            cout << dec << "\t[while] #: " << current_idx << "\tR: " << packet_list[current_idx].resolution << "\tX: " << packet_list[current_idx].precinct_xy.x << "\tY: " << packet_list[current_idx].precinct_xy.y;
-            cout << "\tC: " << packet_list[current_idx].component << "\tL: " << packet_list[current_idx].layer << "\t[" << data_writer.GetCount() << "]" << "\t res: " << res;
-            cout << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
+            //cout << dec << "\t[while] #: " << current_idx << "\tR: " << packet_list[current_idx].resolution << "\tX: " << packet_list[current_idx].precinct_xy.x << "\tY: " << packet_list[current_idx].precinct_xy.y;
+            //cout << "\tC: " << packet_list[current_idx].component << "\tL: " << packet_list[current_idx].layer << "\t[" << data_writer.GetCount() << "]" << "\t res: " << res;
+            //cout << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
+
+            cout << "data_writer.GetCount(): [" << data_writer.GetCount() << "]" << "\t res: " << res << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
 
             if(res < 0) return false;
             else if(res > 0) {
-              if (current_idx != range.last) {
-                current_idx++;
-                cout << dec << "\t** " << current_idx << " ************************** [" << sum << "]" << endl;
-                sum = 0;
-              }
-              else
-              {
-                if(!woi_composer.GetNextPacket()) break;
-                else current_idx = range.first;
-              }
+
+                if(!woi_composer.GetNextPacket(&packet_list[current_idx])) {
+                  if (current_idx != range.last) {
+                    current_idx++;
+                    cout << dec << "\t** " << current_idx << " **************************" << endl;
+                  } else {
+                	//current_idx = range.first;
+                	break;
+                  }
+                }
             }
 
             /*

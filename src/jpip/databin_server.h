@@ -48,6 +48,8 @@ namespace jpip
     bool has_len;		///< <code>true</code> if the last request contained a "len" parameter
 
     uint64_t sum;
+
+    Packet *packet_list;
     /****/
 
     /**
