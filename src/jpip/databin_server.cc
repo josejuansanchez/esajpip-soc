@@ -113,7 +113,7 @@ namespace jpip
     /****/
 
     /****/
-    uint64_t BYTES_PER_FRAME = 4000;
+    uint64_t BYTES_PER_FRAME = 8000;
     /****/
 
 	data_writer.SetBuffer(buff, min(pending, *len));
@@ -199,18 +199,20 @@ namespace jpip
 
             cout << "data_writer.GetCount(): [" << data_writer.GetCount() << "]" << "\t res: " << res << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
 
-
             if(res < 0) return false;
             else if(res > 0) {
 
-            	/*
             	if (sum >= BYTES_PER_FRAME) {
-            	  current_idx++;
-            	  cout << "[sum >= BYTES_PER_FRAME] " << sum << " >= " << BYTES_PER_FRAME << endl;
-            	  sum = 0;
-            	  continue;
+                  if (current_idx != range.last) {
+                    current_idx++;
+                  } else {
+                	current_idx = range.first;
+                  }
+          	      cout << "[sum >= BYTES_PER_FRAME] " << sum << " >= " << BYTES_PER_FRAME << endl;
+          	      sum = 0;
+                  continue;
             	}
-            	*/
+
 
                 if(!woi_composer[current_idx].GetNextPacket()) {
                   if (current_idx != range.last) {
@@ -222,7 +224,6 @@ namespace jpip
                   }
                 }
             }
-
 
             /*
             if(res < 0) return false;
