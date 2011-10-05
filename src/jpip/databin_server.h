@@ -45,7 +45,8 @@ namespace jpip
 
     /****/
     bool has_len;		///< <code>true</code> if the last request contained a "len" parameter
-    uint64_t sum;
+    int bytes_per_frame;
+    int sum;
     /****/
 
     /**
@@ -88,9 +89,9 @@ namespace jpip
         int free = data_writer.GetFree() - MINIMUM_SPACE;
 
         /****/
-        if (DEBUG) {
-          cout << "[WriteSegment] free: " << free << endl;
-        }
+        //if (DEBUG) {
+        //  cout << "[WriteSegment] free: " << free << endl;
+        //}
         /****/
 
         if(free < 0) {
@@ -119,11 +120,11 @@ namespace jpip
       }
 
       /****/
-      if (DEBUG) {
-        cout << dec << "[WriteSegment] # cs: " << num_codestream << "\t id: " << id;
-        cout << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached;
-        cout << "\t segment.length: " << segment.length << "\t res: " << res << endl;
-      }
+      //if (DEBUG) {
+      //  cout << dec << "[WriteSegment] # cs: " << num_codestream << "\t id: " << id;
+      //  cout << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached;
+      //  cout << "\t segment.length: " << segment.length << "\t res: " << res << endl;
+      //}
       /****/
 
       return res;
@@ -177,6 +178,7 @@ namespace jpip
       current_idx = 0;
       /****/
       has_len = false;
+      bytes_per_frame = -1;
       sum = 0;
       /****/
     }

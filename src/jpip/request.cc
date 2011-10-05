@@ -118,6 +118,28 @@ namespace jpip
     	TRACE("JPIP parameter: context=" << min_codestream << ":" << max_codestream);
       }
     }
+    else if (param == "mbw") {
+		if((stream >> x >> c)) {
+		  max_bandwidth = x;
+		  unit_bandwidth = c;
+		  mask.items.mbw = 1;
+	      TRACE("JPIP parameter: mbw=" << max_bandwidth << unit_bandwidth);
+		}
+    }
+    else if (param == "srate") {
+    	if((stream >> x)) {
+    	  sampling_rate = x;
+    	  mask.items.srate = 1;
+    	  TRACE("JPIP parameter: srate=" << sampling_rate);
+    	}
+    }
+    else if (param == "drate") {
+    	if((stream >> x)) {
+    		delivery_rate = x;
+    		mask.items.drate = 1;
+    	  TRACE("JPIP parameter: drate=" << delivery_rate);
+    	}
+    }
 
     getline(stream, value, '&');
 

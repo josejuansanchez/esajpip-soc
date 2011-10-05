@@ -82,6 +82,9 @@ namespace jpip
         int model   : 1;
         int stream  : 1;
         int context : 1;
+        int mbw     : 1;
+        int srate   : 1;
+        int drate   : 1;
       } items;
 
       /**
@@ -134,6 +137,10 @@ namespace jpip
     ParametersMask mask;		///< Parameters mask
     Size resolution_size;		///< Size of the resolution level
     CacheModel cache_model;		///< Cache model
+    int max_bandwidth;		///< Max bandwidth
+    char unit_bandwidth;	    ///< Bandwidth unit of measurement
+    int sampling_rate;			///< Sampling Rate
+    int delivery_rate;			///< Delivery Rate
 
     /**
      * Round direction.

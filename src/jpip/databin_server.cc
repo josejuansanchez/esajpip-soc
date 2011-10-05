@@ -14,6 +14,7 @@ namespace jpip
 
     /****/
     has_len = false;
+    bytes_per_frame = -1;
     sum = 0;
     //delete []woi_composer;
     cout << "[Reset]" << endl;
@@ -96,9 +97,30 @@ namespace jpip
       woi_composer = new WOIComposer[range.Length()];
       for(int i = 0; i < range.Length(); i++) {
     	  woi_composer[i].Reset(woi, *im_index);
-    	  cout << "[SetRequest] #: " << i << endl;
+    	  //cout << "[SetRequest] #: " << i << endl;
       }
       /****/
+    }
+
+    if (req.mask.items.mbw && req.mask.items.srate) {
+    	uint64_t bytes;
+    	switch(req.unit_bandwidth) {
+    	  case 'T': bytes = (uint64_t)req.max_bandwidth << 40;
+    		  	    break;
+    	  case 'G': bytes = req.max_bandwidth << 30;
+    		  	    break;
+    	  case 'M': bytes = req.max_bandwidth << 20;
+    		  	    break;
+    	  case 'K': bytes = req.max_bandwidth << 10;
+    		  	    break;
+    	}
+    	bytes = bytes >> 3;
+    	bytes_per_frame = bytes / req.sampling_rate;
+
+    	cout << "**** bytes_per_frame: " << bytes_per_frame;
+    } else {
+    	// TEST
+    	bytes_per_frame = 8000;
     }
 
     return res;
@@ -108,12 +130,7 @@ namespace jpip
   {
 	/****/
 	if (!has_len)
-	  //pending = cfg.request_len_size();
 	  pending = REQUEST_LEN_SIZE;
-    /****/
-
-    /****/
-    uint64_t BYTES_PER_FRAME = 8000;
     /****/
 
 	data_writer.SetBuffer(buff, min(pending, *len));
@@ -180,11 +197,12 @@ namespace jpip
           // TODO: Calculate first packet to initialize "sum"
 
           while(data_writer && !eof) {
-            //packet= woi_composer.GetCurrentPacket();
             packet= woi_composer[current_idx].GetCurrentPacket();
 
-            cout << dec << "\n[GetCurrentPacket] #: " << current_idx << "\tR: " << packet.resolution << "\tX: " << packet.precinct_xy.x << "\tY: " << packet.precinct_xy.y;
-            cout << "\tC: " << packet.component << "\tL: " << packet.layer << endl;
+            /****/
+            //cout << dec << "\n[GetCurrentPacket] #: " << current_idx << "\tR: " << packet.resolution << "\tX: " << packet.precinct_xy.x << "\tY: " << packet.precinct_xy.y;
+            //cout << "\tC: " << packet.component << "\tL: " << packet.layer << endl;
+            /****/
 
             segment = im_index->GetPacket(current_idx, packet, &bin_offset);
 
@@ -192,32 +210,40 @@ namespace jpip
 
             last_packet = (packet.layer >= (im_index->GetCodingParameters()->num_layers - 1));
 
+            // DELETE THE LAST PARAMETER
             /****/
             res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet, true);
             /****/
             //res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
 
-            cout << "data_writer.GetCount(): [" << data_writer.GetCount() << "]" << "\t res: " << res << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
+            /****/
+            //cout << "data_writer.GetCount(): [" << data_writer.GetCount() << "]" << "\t res: " << res << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
+            /****/
+
+            cout << "**** bytes_per_frame: " << bytes_per_frame << endl;
 
             if(res < 0) return false;
             else if(res > 0) {
 
-            	if (sum >= BYTES_PER_FRAME) {
+            	if (sum >= bytes_per_frame) {
                   if (current_idx != range.last) {
                     current_idx++;
                   } else {
                 	current_idx = range.first;
                   }
-          	      cout << "[sum >= BYTES_PER_FRAME] " << sum << " >= " << BYTES_PER_FRAME << endl;
+                  /****/
+          	      //cout << "[sum >= bytes_per_frame] " << sum << " >= " << bytes_per_frame << endl;
+                  /****/
           	      sum = 0;
                   continue;
             	}
 
-
                 if(!woi_composer[current_idx].GetNextPacket()) {
                   if (current_idx != range.last) {
                     current_idx++;
-                    cout << dec << "\t** " << current_idx << " **************************" << endl;
+                    /****/
+                    //cout << dec << "\t** " << current_idx << " **************************" << endl;
+                    /****/
                   } else {
                 	current_idx = range.first;
                 	break;
@@ -225,7 +251,8 @@ namespace jpip
                 }
             }
 
-            /*
+            // ORIGINAL
+        	/*
             if(res < 0) return false;
             else if(res > 0) {
               if (current_idx != range.last) current_idx++;
@@ -239,7 +266,7 @@ namespace jpip
           }
           /****/
           sum = sum + data_writer.GetCount();
-          cout << dec << " #### [" << sum << "/" << segment.length << "] ####" << endl;
+          //cout << dec << " #### [" << sum << "/" << segment.length << "] ####" << endl;
           /****/
         }
       }
@@ -269,8 +296,8 @@ namespace jpip
     if(*last) cache_model.Pack();
 
     /****/
-    cout << dec << "\t[return][" << data_writer.GetCount() << "]" << hex << " Hex: [" << data_writer.GetCount() << "]";
-    cout << "\tdata_writer: " << data_writer << "\teof: " << eof << endl;
+    //cout << dec << "\t[return][" << data_writer.GetCount() << "]" << hex << " Hex: [" << data_writer.GetCount() << "]";
+    //cout << "\tdata_writer: " << data_writer << "\teof: " << eof << endl;
     /****/
 
     return data_writer;

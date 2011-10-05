@@ -89,7 +89,9 @@ namespace jpip
       }
     }
 
-    cout << "[DataBinWriter][Write] segment.length: " << segment.length << endl;
+    /****/
+    //cout << "[DataBinWriter][Write] segment.length: " << segment.length << endl;
+    /****/
 
     return *this;
   }

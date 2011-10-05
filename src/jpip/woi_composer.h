@@ -128,7 +128,9 @@ namespace jpip
      */
     bool GetNextPacket(Packet *packet = NULL)
     {
-      cout << "[GetNextPacket]" << endl;
+      /****/
+      //cout << "[GetNextPacket]" << endl;
+      /****/
 
       if(!more_packets) return false;
       else {
