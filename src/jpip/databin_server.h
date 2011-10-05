@@ -44,9 +44,9 @@ namespace jpip
     int current_idx;	///< Current codestream index
 
     /****/
-    bool has_len;		///< <code>true</code> if the last request contained a "len" parameter
-    int bytes_per_frame;
-    int sum;
+    bool has_len;			///< <code>true</code> if the last request contained a "len" parameter
+    int bytes_per_frame;	/// Number of bytes for each frame per second (bandwidth/fps)
+    int bytes_sent;		    /// The cumulative number of bytes sent
     /****/
 
     /**
@@ -57,7 +57,6 @@ namespace jpip
 
     CacheModel cache_model;		///< Cache model of the client
     vector<File::Ptr> files;	///< List of files (for hyperlinked JPX files)
-    //WOIComposer woi_composer;	///< WOI composer for determining the packets
     WOIComposer *woi_composer;	///< WOI composer for determining the packets
     ImageIndex::Ptr im_index;	///< Pointer to the associated image index
     DataBinWriter data_writer;	///< Data-bin writer for generating the chunks
@@ -80,7 +79,7 @@ namespace jpip
      * @return The number of bytes of the data-bin written, 0 if the EOF was reached
      * or -1 if an error was generated.
      */
-    template<int BIN_CLASS> int WriteSegment(int num_codestream, int id, FileSegment segment, int offset = 0, bool last = true, bool DEBUG = false)
+    template<int BIN_CLASS> int WriteSegment(int num_codestream, int id, FileSegment segment, int offset = 0, bool last = true)
     {
       int cached = cache_model.GetDataBin<BIN_CLASS>(num_codestream, id);
       int res = 1, seg_cached = cached - offset;
@@ -179,7 +178,7 @@ namespace jpip
       /****/
       has_len = false;
       bytes_per_frame = -1;
-      sum = 0;
+      bytes_sent = 0;
       /****/
     }
 

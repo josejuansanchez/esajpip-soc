@@ -15,9 +15,8 @@ namespace jpip
     /****/
     has_len = false;
     bytes_per_frame = -1;
-    sum = 0;
-    //delete []woi_composer;
-    cout << "[Reset]" << endl;
+    bytes_sent = 0;
+    //delete[] woi_composer;
     /****/
 
     file = File::Ptr(new File());
@@ -92,12 +91,11 @@ namespace jpip
 
     if(reset_woi) {
       end_woi_ = false;
-      //woi_composer.Reset(woi, *im_index);
       /****/
+      //delete[] woi_composer;
       woi_composer = new WOIComposer[range.Length()];
       for(int i = 0; i < range.Length(); i++) {
     	  woi_composer[i].Reset(woi, *im_index);
-    	  //cout << "[SetRequest] #: " << i << endl;
       }
       /****/
     }
@@ -114,13 +112,7 @@ namespace jpip
     	  case 'K': bytes = req.max_bandwidth << 10;
     		  	    break;
     	}
-    	bytes = bytes >> 3;
-    	bytes_per_frame = bytes / req.sampling_rate;
-
-    	cout << "**** bytes_per_frame: " << bytes_per_frame;
-    } else {
-    	// TEST
-    	bytes_per_frame = 8000;
+    	bytes_per_frame = (bytes >> 3) / req.sampling_rate;
     }
 
     return res;
@@ -181,6 +173,7 @@ namespace jpip
       if (!eof)
       {
     	// TODO: Optimize
+
     	for (int i = range.first; i <= range.last; i++)
         {
           WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
@@ -194,7 +187,7 @@ namespace jpip
           int bin_id, bin_offset;
           bool last_packet = false;
 
-          // TODO: Calculate first packet to initialize "sum"
+          // TODO: Calculate first packet to initialize "bytes_sent"
 
           while(data_writer && !eof) {
             packet= woi_composer[current_idx].GetCurrentPacket();
@@ -210,31 +203,28 @@ namespace jpip
 
             last_packet = (packet.layer >= (im_index->GetCodingParameters()->num_layers - 1));
 
-            // DELETE THE LAST PARAMETER
-            /****/
-            res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet, true);
-            /****/
-            //res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
+            res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
 
             /****/
             //cout << "data_writer.GetCount(): [" << data_writer.GetCount() << "]" << "\t res: " << res << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
             /****/
 
-            cout << "**** bytes_per_frame: " << bytes_per_frame << endl;
+            //cout << "**** Bytes per frame: " << bytes_per_frame << endl;
 
             if(res < 0) return false;
             else if(res > 0) {
 
-            	if (sum >= bytes_per_frame) {
+            	//if (bytes_sent >= bytes_per_frame) {
+            	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
                   if (current_idx != range.last) {
                     current_idx++;
                   } else {
                 	current_idx = range.first;
                   }
                   /****/
-          	      //cout << "[sum >= bytes_per_frame] " << sum << " >= " << bytes_per_frame << endl;
+          	      //cout << "[bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
                   /****/
-          	      sum = 0;
+          	      bytes_sent = 0;
                   continue;
             	}
 
@@ -265,8 +255,8 @@ namespace jpip
             */
           }
           /****/
-          sum = sum + data_writer.GetCount();
-          //cout << dec << " #### [" << sum << "/" << segment.length << "] ####" << endl;
+          bytes_sent = bytes_sent + data_writer.GetCount();
+          //cout << dec << " #### [" << bytes_sent << "/" << segment.length << "] ####" << endl;
           /****/
         }
       }
