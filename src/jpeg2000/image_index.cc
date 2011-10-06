@@ -163,16 +163,7 @@ namespace jpeg2000
 
     if (hyper_links.size()>0)
     {
-    	/****/
-    	//cout << "\n[GetPacket] hyper_links.size > 0" << endl;
-    	/****/
-
     	if(packet.resolution > hyper_links[num_codestream]->max_resolution.back()) {
-
-    		/****/
-    		//cout << "[GetPacket] packet.resolution: " << packet.resolution << "\th.m.back: " << hyper_links[num_codestream]->max_resolution.back() << endl;
-    		/****/
-
     		if(!hyper_links[num_codestream]->BuildIndex(0,packet.resolution))
     			ERROR("The packet index could not be created");
     		hyper_links[num_codestream]->max_resolution.back() = packet.resolution;

@@ -129,7 +129,7 @@ namespace jpip
     bool GetNextPacket(Packet *packet = NULL)
     {
       /****/
-      //cout << "[GetNextPacket]" << endl;
+      cout << "[GetNextPacket] x: " << current_packet.precinct_xy.x << "\ty: " << current_packet.precinct_xy.y << endl;
       /****/
 
       if(!more_packets) return false;

@@ -17,6 +17,7 @@ namespace jpip
     bytes_per_frame = -1;
     bytes_sent = 0;
     //delete[] woi_composer;
+    header_sent = false;
     /****/
 
     file = File::Ptr(new File());
@@ -39,6 +40,10 @@ namespace jpip
   {
     bool res = true;
     bool reset_woi = false;
+
+    /****/
+    header_sent = false;
+    /****/
 
     data_writer.ClearPreviousIds();
 
@@ -173,12 +178,21 @@ namespace jpip
       if (!eof)
       {
     	// TODO: Optimize
-
-    	for (int i = range.first; i <= range.last; i++)
-        {
-          WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
-          WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
-        }
+    	/****/
+    	if (!header_sent)
+    	{
+    	  int cont = 0;
+    	  for (int i = range.first; i <= range.last; i++)
+          {
+    	    int res_main, res_tile;
+            res_main = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
+            res_tile = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+            cout << "[" << i << "] " << res_main << "\t" << res_tile << endl;
+            if (res_main && res_tile) cont++;
+          }
+    	  if (cont == range.Length()) {header_sent = true; cout << "**********************************" << endl;}
+    	}
+    	/****/
 
         if(has_woi) {
           int res;
@@ -222,7 +236,7 @@ namespace jpip
                 	current_idx = range.first;
                   }
                   /****/
-          	      //cout << "[bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+          	      cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
                   /****/
           	      bytes_sent = 0;
                   continue;
@@ -232,7 +246,7 @@ namespace jpip
                   if (current_idx != range.last) {
                     current_idx++;
                     /****/
-                    //cout << dec << "\t** " << current_idx << " **************************" << endl;
+                    cout << dec << "\t** " << current_idx << " **************************" << endl;
                     /****/
                   } else {
                 	current_idx = range.first;
