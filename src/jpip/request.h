@@ -137,7 +137,7 @@ namespace jpip
     ParametersMask mask;		///< Parameters mask
     Size resolution_size;		///< Size of the resolution level
     CacheModel cache_model;		///< Cache model
-    int max_bandwidth;		///< Max bandwidth
+    int max_bandwidth;			///< Max bandwidth
     char unit_bandwidth;	    ///< Bandwidth unit of measurement
     int sampling_rate;			///< Sampling Rate
     int delivery_rate;			///< Delivery Rate

@@ -88,12 +88,6 @@ namespace jpip
       if((cached != INT_MAX) && (((int)segment.length - seg_cached) >= 0)) {
         int free = data_writer.GetFree() - MINIMUM_SPACE;
 
-        /****/
-        //if (DEBUG) {
-        //  cout << "[WriteSegment] free: " << free << endl;
-        //}
-        /****/
-
         if(free < 0) {
           eof = true;
           res = 0;
@@ -118,14 +112,6 @@ namespace jpip
           else cache_model.AddToDataBin<BIN_CLASS>(num_codestream, id, segment.length, last);
         }
       }
-
-      /****/
-      //if (DEBUG) {
-      //  cout << dec << "[WriteSegment] # cs: " << num_codestream << "\t id: " << id;
-      //  cout << "\t cached: " << cached << "\t offset: " << offset << "\t seg_cached: " << seg_cached;
-      //  cout << "\t segment.length: " << segment.length << "\t res: " << res << endl;
-      //}
-      /****/
 
       return res;
     }

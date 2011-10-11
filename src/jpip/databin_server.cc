@@ -190,7 +190,7 @@ namespace jpip
             cout << "[" << i << "] " << res_main << "\t" << res_tile << endl;
             if (res_main && res_tile) cont++;
           }
-    	  if (cont == range.Length()) {header_sent = true; cout << "**********************************" << endl;}
+    	  if (cont == range.Length()) header_sent = true;
     	}
     	/****/
 
@@ -206,11 +206,6 @@ namespace jpip
           while(data_writer && !eof) {
             packet= woi_composer[current_idx].GetCurrentPacket();
 
-            /****/
-            //cout << dec << "\n[GetCurrentPacket] #: " << current_idx << "\tR: " << packet.resolution << "\tX: " << packet.precinct_xy.x << "\tY: " << packet.precinct_xy.y;
-            //cout << "\tC: " << packet.component << "\tL: " << packet.layer << endl;
-            /****/
-
             segment = im_index->GetPacket(current_idx, packet, &bin_offset);
 
             bin_id = im_index->GetCodingParameters()->GetPrecinctDataBinId(packet);
@@ -218,12 +213,6 @@ namespace jpip
             last_packet = (packet.layer >= (im_index->GetCodingParameters()->num_layers - 1));
 
             res = WriteSegment<DataBinClass::PRECINCT>(current_idx, bin_id, segment, bin_offset, last_packet);
-
-            /****/
-            //cout << "data_writer.GetCount(): [" << data_writer.GetCount() << "]" << "\t res: " << res << "\t data_writer: " << data_writer << "\t eof: " << eof << endl;
-            /****/
-
-            //cout << "**** Bytes per frame: " << bytes_per_frame << endl;
 
             if(res < 0) return false;
             else if(res > 0) {
@@ -252,6 +241,7 @@ namespace jpip
                 	current_idx = range.first;
                 	break;
                   }
+                  bytes_sent = 0;
                 }
             }
 
@@ -270,12 +260,11 @@ namespace jpip
           }
           /****/
           bytes_sent = bytes_sent + data_writer.GetCount();
-          //cout << dec << " #### [" << bytes_sent << "/" << segment.length << "] ####" << endl;
           /****/
         }
       }
 
-       if(!eof) {
+      if(!eof) {
         data_writer.WriteEOR(EOR::WINDOW_DONE);
         end_woi_ = true;
         pending = 0;
@@ -298,11 +287,6 @@ namespace jpip
     *last = (pending <= 0);
 
     if(*last) cache_model.Pack();
-
-    /****/
-    //cout << dec << "\t[return][" << data_writer.GetCount() << "]" << hex << " Hex: [" << data_writer.GetCount() << "]";
-    //cout << "\tdata_writer: " << data_writer << "\teof: " << eof << endl;
-    /****/
 
     return data_writer;
   }
