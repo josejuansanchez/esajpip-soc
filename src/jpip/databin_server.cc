@@ -16,7 +16,7 @@ namespace jpip
     has_len = false;
     bytes_per_frame = -1;
     bytes_sent = 0;
-    //delete[] woi_composer;
+    woi_composer.clear();
     header_sent = false;
     /****/
 
@@ -97,8 +97,7 @@ namespace jpip
     if(reset_woi) {
       end_woi_ = false;
       /****/
-      //delete[] woi_composer;
-      woi_composer = new WOIComposer[range.Length()];
+      woi_composer.resize(range.Length());
       for(int i = 0; i < range.Length(); i++) {
     	  woi_composer[i].Reset(woi, *im_index);
       }

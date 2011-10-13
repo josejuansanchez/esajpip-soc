@@ -56,11 +56,11 @@ namespace jpip
      */
     bool eof;
 
-    CacheModel cache_model;		///< Cache model of the client
-    vector<File::Ptr> files;	///< List of files (for hyperlinked JPX files)
-    WOIComposer *woi_composer;	///< WOI composer for determining the packets
-    ImageIndex::Ptr im_index;	///< Pointer to the associated image index
-    DataBinWriter data_writer;	///< Data-bin writer for generating the chunks
+    CacheModel cache_model;				///< Cache model of the client
+    vector<File::Ptr> files;			///< List of files (for hyperlinked JPX files)
+    vector<WOIComposer> woi_composer;	///< List of WOI composer for determining the packets
+    ImageIndex::Ptr im_index;			///< Pointer to the associated image index
+    DataBinWriter data_writer;			///< Data-bin writer for generating the chunks
 
     enum {
       MINIMUM_SPACE = 60		///< Minimum space in the chunk
