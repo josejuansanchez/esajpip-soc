@@ -117,6 +117,11 @@ namespace jpip
     		  	    break;
     	}
     	bytes_per_frame = (bytes >> 3) / req.sampling_rate;
+
+    	/****/
+    	if ((woi.size.x!= 0) && (woi.size.y!= 0)) has_woi = true;
+    	//has_woi = true;			// Temporal
+    	/****/
     }
 
     return res;
@@ -186,7 +191,9 @@ namespace jpip
     	    int res_main, res_tile;
             res_main = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
             res_tile = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
-            cout << "[" << i << "] " << res_main << "\t" << res_tile << endl;
+
+            //cout << "[" << i << "] " << res_main << "\t" << res_tile << endl;
+
             if (res_main && res_tile) cont++;
           }
     	  if (cont == range.Length()) header_sent = true;
