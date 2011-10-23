@@ -48,6 +48,7 @@ namespace jpip
     int bytes_per_frame;	/// Number of bytes for each frame per second (bandwidth/fps)
     int bytes_sent;		    /// The cumulative number of bytes sent
     bool header_sent;
+    WOIComposer wc;			/// DEBUG
     /****/
 
     /**

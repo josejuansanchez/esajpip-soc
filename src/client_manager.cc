@@ -202,6 +202,10 @@ void ClientManager::Run(ClientInfo *client_info)
         /****/
       }
 
+      /****/
+      cout << "### Sending a empty chunk ###" << endl;
+      /****/
+
       sock_stream
         << "0" << http::Protocol::CRLF
         << http::Protocol::CRLF
