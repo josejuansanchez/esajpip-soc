@@ -37,6 +37,7 @@ void ClientManager::Run(ClientInfo *client_info)
   bool send_data = false;
   ImageIndex::Ptr im_index;
   DataBinServer data_server;
+  bool is_cnew = false;
 
   string backup_file = cfg.caching_folder() +
       base::to_string(client_info->father_sock()) + ".backup";
@@ -89,6 +90,7 @@ void ClientManager::Run(ClientInfo *client_info)
 
     pclose = true;
     send_data = false;
+    is_cnew = false;
 
     if (req.mask.items.cclose)
     {
@@ -134,6 +136,7 @@ void ClientManager::Run(ClientInfo *client_info)
           OutputStream().Open(backup_file.c_str()).Serialize(req.cache_model);
           is_opened = true;
           send_data = true;
+          is_cnew = true;
         }
       }
 
@@ -167,11 +170,10 @@ void ClientManager::Run(ClientInfo *client_info)
       sock_stream << http::Response(500) << http::Protocol::CRLF << flush;
     else if(send_data) {
 
-      /****/
-      //int cont = 0;
-      /****/
-
       for(bool last = false; !last;) {
+
+        if (is_cnew) break;
+
         chunk_len = buf_len;
 
         if(!data_server.GenerateChunk(buf, &chunk_len, &last)) {
@@ -183,23 +185,16 @@ void ClientManager::Run(ClientInfo *client_info)
         if(chunk_len > 0) {
           sock_stream << hex << chunk_len << dec << http::Protocol::CRLF << flush;
 
-          /****/
-          //cont++;
-          //cout << "[ClientManager][Run][" << dec << cont << "] chunk_len (hex): " << hex << chunk_len << endl;
-          /****/
-
           //LOG("Chunk of " << chunk_len << " bytes sent");
           sock_stream->Send(buf, chunk_len);
 
           sock_stream << http::Protocol::CRLF << flush;
         }
 
-        /****/
         if(sock_stream->Peek(buf, chunk_len) != -1) {
           cout << "[ClientManager][Run] New Request. Channel: " << channel << endl;
           break;
         }
-        /****/
       }
 
       /****/
