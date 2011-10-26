@@ -11,13 +11,12 @@ namespace jpip
     metareq = false;
     has_woi = false;
     im_index = image_index;
-
-    /****/
     has_len = false;
     bytes_per_frame = -1;
     bytes_sent = 0;
     woi_composer.clear();
-    header_sent = false;
+    /****/
+    //header_sent = false;
     /****/
 
     file = File::Ptr(new File());
@@ -42,7 +41,7 @@ namespace jpip
     bool reset_woi = false;
 
     /****/
-    header_sent = false;
+    //header_sent = false;
     /****/
 
     data_writer.ClearPreviousIds();
@@ -96,17 +95,13 @@ namespace jpip
 
     if(reset_woi) {
       end_woi_ = false;
-      /****/
       woi_composer.resize(range.Length());
       for(int i = 0; i < range.Length(); i++) {
     	  woi_composer[i].Reset(woi, *im_index);
       }
-
-      wc.Reset(woi, *im_index);	// DEBUG
-      /****/
     }
 
-    if (req.mask.items.mbw && req.mask.items.srate) {
+    if (req.mask.items.mbw && req.mask.items.srate && req.mask.items.drate) {
     	uint64_t bytes;
     	switch(req.unit_bandwidth) {
     	  case 'T': bytes = (uint64_t)req.max_bandwidth << 40;
@@ -120,9 +115,10 @@ namespace jpip
     	}
     	bytes_per_frame = (bytes >> 3) / req.sampling_rate;
 
-    	/****/
+    	if (bytes_per_frame < MIN_BYTES_PER_FRAME) bytes_per_frame = MIN_BYTES_PER_FRAME;
+
+    	// Check if the previous query had a WOI
     	if ((woi.size.x!= 0) && (woi.size.y!= 0)) has_woi = true;
-    	/****/
     }
 
     return res;
@@ -130,10 +126,8 @@ namespace jpip
 	
   bool DataBinServer::GenerateChunk(char *buff, int *len, bool *last)
   {
-	/****/
 	if (!has_len)
 	  pending = REQUEST_LEN_SIZE;
-    /****/
 
 	data_writer.SetBuffer(buff, min(pending, *len));
 
@@ -182,11 +176,10 @@ namespace jpip
 
       if (!eof)
       {
-    	// TODO: Optimize
     	/****/
-    	if (!header_sent)
-    	{
-    	  int cont = 0;
+    	//if (!header_sent)
+    	//{
+    	  //int cont = 0;
     	  for (int i = range.first; i <= range.last; i++)
           {
     	    int res_main, res_tile;
@@ -195,10 +188,10 @@ namespace jpip
 
             //cout << "[" << i << "] " << res_main << "\t" << res_tile << endl;
 
-            if (res_main && res_tile) cont++;
+            //if (res_main && res_tile) cont++;
           }
-    	  if (cont == range.Length()) header_sent = true;
-    	}
+    	  //if (cont == range.Length()) header_sent = true;
+    	//}
     	/****/
 
         if(has_woi) {
@@ -208,12 +201,9 @@ namespace jpip
           int bin_id, bin_offset;
           bool last_packet = false;
 
-          // TODO: Calculate first packet to initialize "bytes_sent"
-
           while(data_writer && !eof) {
 
         	packet= woi_composer[current_idx].GetCurrentPacket();
-            //packet= wc.GetCurrentPacket();								// DEBUG
 
             segment = im_index->GetPacket(current_idx, packet, &bin_offset);
 
@@ -227,7 +217,7 @@ namespace jpip
             else if(res > 0) {
 
             	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
-            	  cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+            	  //cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
             	  if (current_idx != range.last) {
                     current_idx++;
                   } else {
@@ -236,7 +226,7 @@ namespace jpip
           	      bytes_sent = 0;
             	} else {
                     if(!woi_composer[current_idx].GetNextPacket()) {
-                      cout << dec << "\t** " << current_idx << " **************************" << endl;
+                      //cout << dec << "\t[" << current_idx << "] ****" << endl;
                       if (current_idx != range.last) {
                         current_idx++;
                       } else {
@@ -246,19 +236,6 @@ namespace jpip
                       bytes_sent = 0;
                     }
             	}
-
-            	// DEBUG
-            	/*
-                if(res < 0) return false;
-                else if(res > 0) {
-                  if (current_idx != range.last) current_idx++;
-                  else
-                  {
-                    if(!wc.GetNextPacket()) break;
-                    else current_idx = range.first;
-                  }
-                }
-                */
             }
           }
           bytes_sent = bytes_sent + data_writer.GetCount();

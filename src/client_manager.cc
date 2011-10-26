@@ -196,14 +196,14 @@ void ClientManager::Run(ClientInfo *client_info)
 
         /****/
         if(sock_stream->Peek(buf, chunk_len) != -1) {
-          cout << "[ClientManager][Run] New Request " << endl;
+          cout << "[ClientManager][Run] New Request. Channel: " << channel << endl;
           break;
         }
         /****/
       }
 
       /****/
-      cout << "### Sending a empty chunk ###" << endl;
+      cout << "### Sending a empty chunk. Channel: " << channel << " ###" << endl;
       /****/
 
       sock_stream

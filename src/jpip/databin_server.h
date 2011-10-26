@@ -43,13 +43,10 @@ namespace jpip
     File::Ptr file;		///< Pointer to the associated image file
     int current_idx;	///< Current codestream index
 
-    /****/
     bool has_len;			///< <code>true</code> if the last request contained a "len" parameter
     int bytes_per_frame;	/// Number of bytes for each frame per second (bandwidth/fps)
     int bytes_sent;		    /// The cumulative number of bytes sent
     bool header_sent;
-    WOIComposer wc;			/// DEBUG
-    /****/
 
     /**
      * <code>true</code> if the end has been reached and the last write operation
@@ -64,11 +61,9 @@ namespace jpip
     DataBinWriter data_writer;			///< Data-bin writer for generating the chunks
 
     enum {
-      MINIMUM_SPACE = 60		///< Minimum space in the chunk
-    };
-
-    enum {
-      REQUEST_LEN_SIZE = 4000	///< The length in bytes of a JPIP request
+      MINIMUM_SPACE = 60,				///< Minimum space in the chunk
+      REQUEST_LEN_SIZE = 4000,			///< The length in bytes of a JPIP request
+      MIN_BYTES_PER_FRAME = 500 		///< The minimum frame payload
     };
 
     /**
@@ -163,12 +158,10 @@ namespace jpip
       end_woi_ = false;
       metareq = false;
       current_idx = 0;
-      /****/
       has_len = false;
       bytes_per_frame = -1;
       bytes_sent = 0;
       header_sent = false;
-      /****/
     }
 
     /**
