@@ -46,7 +46,6 @@ namespace jpip
     bool has_len;			///< <code>true</code> if the last request contained a "len" parameter
     int bytes_per_frame;	/// Number of bytes for each frame per second (bandwidth/fps)
     int bytes_sent;		    /// The cumulative number of bytes sent
-    bool header_sent;
 
     /**
      * <code>true</code> if the end has been reached and the last write operation
@@ -161,7 +160,6 @@ namespace jpip
       has_len = false;
       bytes_per_frame = -1;
       bytes_sent = 0;
-      header_sent = false;
     }
 
     /**

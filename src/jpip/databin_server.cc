@@ -15,9 +15,6 @@ namespace jpip
     bytes_per_frame = -1;
     bytes_sent = 0;
     woi_composer.clear();
-    /****/
-    //header_sent = false;
-    /****/
 
     file = File::Ptr(new File());
 
@@ -39,10 +36,6 @@ namespace jpip
   {
     bool res = true;
     bool reset_woi = false;
-
-    /****/
-    //header_sent = false;
-    /****/
 
     data_writer.ClearPreviousIds();
 
@@ -176,23 +169,11 @@ namespace jpip
 
       if (!eof)
       {
-    	/****/
-    	//if (!header_sent)
-    	//{
-    	  //int cont = 0;
-    	  for (int i = range.first; i <= range.last; i++)
-          {
-    	    int res_main, res_tile;
-            res_main = WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
-            res_tile = WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
-
-            //cout << "[" << i << "] " << res_main << "\t" << res_tile << endl;
-
-            //if (res_main && res_tile) cont++;
-          }
-    	  //if (cont == range.Length()) header_sent = true;
-    	//}
-    	/****/
+   	    for (int i = range.first; i <= range.last; i++)
+        {
+          WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
+          WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+        }
 
         if(has_woi) {
           int res;
@@ -217,7 +198,7 @@ namespace jpip
             else if(res > 0) {
 
             	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
-            	  //cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+            	  /*cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;*/
             	  if (current_idx != range.last) {
                     current_idx++;
                   } else {
@@ -226,7 +207,7 @@ namespace jpip
           	      bytes_sent = 0;
             	} else {
                     if(!woi_composer[current_idx].GetNextPacket()) {
-                      //cout << dec << "\t[" << current_idx << "] ****" << endl;
+                      /*cout << dec << "\t[" << current_idx << "] ****" << endl;*/
                       if (current_idx != range.last) {
                         current_idx++;
                       } else {
