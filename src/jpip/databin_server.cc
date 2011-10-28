@@ -112,6 +112,8 @@ namespace jpip
 
     	// Check if the previous query had a WOI
     	if ((woi.size.x!= 0) && (woi.size.y!= 0)) has_woi = true;
+    } else {
+    	bytes_per_frame = -1;
     }
 
     return res;
@@ -198,7 +200,7 @@ namespace jpip
             else if(res > 0) {
 
             	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
-            	  /*cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;*/
+            	  cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
             	  if (current_idx != range.last) {
                     current_idx++;
                   } else {
@@ -207,7 +209,7 @@ namespace jpip
           	      bytes_sent = 0;
             	} else {
                     if(!woi_composer[current_idx].GetNextPacket()) {
-                      /*cout << dec << "\t[" << current_idx << "] ****" << endl;*/
+                      cout << dec << "\t[" << current_idx << "] ****" << endl;
                       if (current_idx != range.last) {
                         current_idx++;
                       } else {
