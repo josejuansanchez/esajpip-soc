@@ -210,8 +210,6 @@ namespace jpeg2000
        res = (rdwr_lock->Wait() == WAIT_OBJECT);
      else
      {
-       //for(int i = range.first; i <= range.last; i++)
-       //  res = res && hyper_links[i]->ReadLock();
      	for(int i = 0; i < range.Length(); i++)
      	 res = res && hyper_links[range.GetItem(i)]->ReadLock();
      }
@@ -226,8 +224,6 @@ namespace jpeg2000
      if (hyper_links.size() <= 0)
        res = rdwr_lock->Release();
      else {
-       //for(int i = range.first; i <= range.last; i++)
-       //  res = res && hyper_links[i]->ReadUnlock();
      	for(int i = 0; i < range.Length(); i++)
      	 res = res && hyper_links[range.GetItem(i)]->ReadUnlock();
      }

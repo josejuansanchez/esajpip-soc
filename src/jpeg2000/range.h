@@ -43,7 +43,6 @@ namespace jpeg2000
      */
     Range(int first, int last, int max_val = INT_MAX)
     {
-      //assert((first >= 0) && (first <= last));
       this->max_val = max_val;
       this->first = first;
       this->last = last;
@@ -88,7 +87,6 @@ namespace jpeg2000
      */
     int GetItem(int i) const
     {
-      //return (first + i);
       return ((first + i) % max_val);
     }
 
@@ -99,7 +97,6 @@ namespace jpeg2000
      */
     int GetIndex(int item) const
     {
-        //return (item - first);
     	int res = (item - first);
     	return ((res >= 0) ? res : (item + (max_val - first)));
     }
@@ -121,7 +118,6 @@ namespace jpeg2000
      */
     int Length() const
     {
-      //return (last - first + 1);
       return ((first <= last) ? (last - first + 1) : (max_val - first + last + 1));
     }
 
