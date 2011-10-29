@@ -2,6 +2,8 @@
 #include "data/file_segment.h"
 
 
+//#define CLASSIC 1
+
 namespace jpip
 {
 
@@ -48,7 +50,9 @@ namespace jpip
       if(new_woi != woi) {
         reset_woi = true;
         woi = new_woi;
+        /****/
         current_idx = range.first;
+        /****/
       }
     }
 
@@ -60,7 +64,11 @@ namespace jpip
 
     if(req.mask.items.stream || req.mask.items.context) {
 
+#ifdef CLASSIC
+      Range new_range = Range(req.min_codestream, req.max_codestream);
+#else
       Range new_range = Range(req.min_codestream, req.max_codestream, im_index->GetNumCodestreams());
+#endif
 
       if(new_range != range) {
         reset_woi = true;
@@ -173,12 +181,18 @@ namespace jpip
 
       if (!eof)
       {
+   	    /*for (int i = range.first; i <= range.last; i++)
+        {
+          WriteSegment<DataBinClass::MAIN_HEADER>(i, 0, im_index->GetMainHeader(i));
+          WriteSegment<DataBinClass::TILE_HEADER>(i, 0, FileSegment::Null);
+        }*/
+
       	for (int i = 0; i < range.Length(); i++)
       	{
       		int idx = range.GetItem(i);
       		WriteSegment<DataBinClass::MAIN_HEADER>(idx, 0, im_index->GetMainHeader(idx));
-			WriteSegment<DataBinClass::TILE_HEADER>(idx, 0, FileSegment::Null);
-		}
+					WriteSegment<DataBinClass::TILE_HEADER>(idx, 0, FileSegment::Null);
+				}
 
         if(has_woi) {
           int res;
@@ -189,7 +203,11 @@ namespace jpip
 
           while(data_writer && !eof) {
 
+#ifdef CLASSIC
+        	packet= woi_composer[current_idx].GetCurrentPacket();
+#else
           	packet= woi_composer[range.GetIndex(current_idx)].GetCurrentPacket();
+#endif
 
             segment = im_index->GetPacket(current_idx, packet, &bin_offset);
 
@@ -203,15 +221,39 @@ namespace jpip
             else if(res > 0) {
 
             	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
-            	  //cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+            	  cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+
+#ifdef CLASSIC
+            	  if (current_idx != range.last) {
+                    current_idx++;
+
+                  } else {
+                	current_idx = range.first;
+                  }
+#else
             	  range.GetNext(current_idx);
+#endif
+
           	      bytes_sent = 0;
             	} else {
+#ifdef CLASSIC
+                    if(!woi_composer[current_idx].GetNextPacket()) {
+                      cout << dec << "\t[" << current_idx << "] ****" << endl;
+                      if (current_idx != range.last) {
+                        current_idx++;
+                      } else {
+                    	current_idx = range.first;
+                    	break;
+                      }
+                      bytes_sent = 0;
+                    }
+#else
             		if(!woi_composer[range.GetIndex(current_idx)].GetNextPacket()) {
-            		   //cout << dec << "\t[" << current_idx << "] ****" << endl;
+            		   cout << dec << "\t[" << current_idx << "] ****" << endl;
             		   if(range.GetNext(current_idx)) break;
             		   bytes_sent = 0;
             		}
+#endif
             	}
             }
           }
