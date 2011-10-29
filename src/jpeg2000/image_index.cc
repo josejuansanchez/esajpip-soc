@@ -183,10 +183,6 @@ namespace jpeg2000
     int idx = coding_parameters->GetProgressionIndex(packet);
     segment = packet_index[idx];
 
-    /****/
-    //cout << dec << "[GetPacket] num_codestream: " << num_codestream << "\tidx: " << idx << "\tsegment: " << segment.length << endl;
-    /****/
-
     if(offset != NULL) {
     	*offset = 0;
 
@@ -207,33 +203,37 @@ namespace jpeg2000
   }
 
   bool ImageIndex::ReadLock(const Range& range)
-  {
-    bool res = true;
+   {
+     bool res = true;
 
-    if (hyper_links.size() <= 0)
-      res = (rdwr_lock->Wait() == WAIT_OBJECT);
-    else
-    {
-      for(int i = range.first; i <= range.last; i++)
-        res = res && hyper_links[i]->ReadLock();
-    }
+     if (hyper_links.size() <= 0)
+       res = (rdwr_lock->Wait() == WAIT_OBJECT);
+     else
+     {
+       //for(int i = range.first; i <= range.last; i++)
+       //  res = res && hyper_links[i]->ReadLock();
+     	for(int i = 0; i < range.Length(); i++)
+     	 res = res && hyper_links[range.GetItem(i)]->ReadLock();
+     }
 
-    return res;
-  }
+     return res;
+   }
 
-  bool ImageIndex::ReadUnlock(const Range& range)
-  {
-    bool res = true;
+   bool ImageIndex::ReadUnlock(const Range& range)
+   {
+     bool res = true;
 
-    if (hyper_links.size() <= 0)
-      res = rdwr_lock->Release();
-    else {
-      for(int i = range.first; i <= range.last; i++)
-        res = res && hyper_links[i]->ReadUnlock();
-    }
+     if (hyper_links.size() <= 0)
+       res = rdwr_lock->Release();
+     else {
+       //for(int i = range.first; i <= range.last; i++)
+       //  res = res && hyper_links[i]->ReadUnlock();
+     	for(int i = 0; i < range.Length(); i++)
+     	 res = res && hyper_links[range.GetItem(i)]->ReadUnlock();
+     }
 
-    return res;
-  }
+     return res;
+   }
 
 }
 

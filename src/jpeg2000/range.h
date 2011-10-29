@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <assert.h>
+#include <limits.h>
 
 
 namespace jpeg2000
@@ -20,8 +21,9 @@ namespace jpeg2000
   class Range
   {
   public:
-    int first;	///< First value of the range
-    int last;	///< Last value of the range
+    int first;		///< First value of the range
+    int last;		///< Last value of the range
+    int max_val;	///< Maximum range value
 
 
     /**
@@ -29,6 +31,7 @@ namespace jpeg2000
      */
     Range()
     {
+      max_val = INT_MAX;
       first = 0;
       last = 0;
     }
@@ -38,10 +41,10 @@ namespace jpeg2000
      * @param first First value.
      * @param last Last value.
      */
-    Range(int first, int last)
+    Range(int first, int last, int max_val = INT_MAX)
     {
-      assert((first >= 0) && (first <= last));
-
+      //assert((first >= 0) && (first <= last));
+      this->max_val = max_val;
       this->first = first;
       this->last = last;
     }
@@ -59,6 +62,7 @@ namespace jpeg2000
      */
     Range& operator=(const Range& range)
     {
+      max_val = range.max_val;
       first = range.first;
       last = range.last;
 
@@ -72,7 +76,8 @@ namespace jpeg2000
      */
     bool IsValid() const
     {
-      return ((first >= 0) && (first <= last));
+      return ((first >= 0) && (first < max_val) &&
+      				(last >= 0) && (last < max_val));
     }
 
     /**
@@ -83,7 +88,8 @@ namespace jpeg2000
      */
     int GetItem(int i) const
     {
-      return (first + i);
+      //return (first + i);
+      return ((first + i) % max_val);
     }
 
     /**
@@ -93,7 +99,21 @@ namespace jpeg2000
      */
     int GetIndex(int item) const
     {
-      return (item - first);
+        //return (item - first);
+    	int res = (item - first);
+    	return ((res >= 0) ? res : (item + (max_val - first)));
+    }
+
+    bool GetNext(int& val) const
+    {
+    	if(val != last) {
+    		val = (val + 1) % max_val;
+    		return false;
+
+    	} else {
+    		val = first;
+    		return true;
+    	}
     }
 
     /**
@@ -101,17 +121,18 @@ namespace jpeg2000
      */
     int Length() const
     {
-      return (last - first + 1);
+      //return (last - first + 1);
+      return ((first <= last) ? (last - first + 1) : (max_val - first + last + 1));
     }
 
     friend bool operator==(const Range& a, const Range& b)
     {
-       return ((a.first == b.first) && (a.last == b.last));
+       return ((a.first == b.first) && (a.last == b.last) && (a.max_val == b.max_val));
     }
 
     friend bool operator!=(const Range& a, const Range& b)
     {
-      return ((a.first != b.first) || (a.last != b.last));
+      return ((a.first != b.first) || (a.last != b.last) || (a.max_val != b.max_val));
     }
 
     friend ostream& operator << (ostream &out, const Range &range)
