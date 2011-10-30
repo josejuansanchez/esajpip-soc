@@ -61,8 +61,10 @@ void ClientManager::Run(ClientInfo *client_info)
 
     if(!(sock_stream >> req).good()) {
       if(sock_stream->IsValid()) LOG("Incorrect request received");
-      else LOG("Connection closed by the client");
-      sock_stream->Close();
+      else {
+    	  LOG("Connection closed by the client");
+    	  sock_stream->Close();
+      }
       break;
 
     } else {
