@@ -146,7 +146,7 @@ int main(int argc, char **argv)
                   new_conn.Close();
 
                 } else {
-                  poll_table.Add(new_conn, POLLERR | POLLHUP | POLLNVAL);
+                  poll_table.Add(new_conn, POLLRDHUP | POLLERR | POLLHUP | POLLNVAL);
                   app_info->num_connections++;
                 }
               }
