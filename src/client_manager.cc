@@ -105,6 +105,9 @@ void ClientManager::Run(ClientInfo *client_info)
         unlink(backup_file.c_str());
         LOG("The channel " << channel << " has been closed");
         sock_stream << http::Response(200) << http::Header::ContentLength("0") << http::Protocol::CRLF << flush;
+        /****/
+        sock_stream << "0" << http::Protocol::CRLF << http::Protocol::CRLF << flush;
+        /****/
       }
     }
     else if (req.mask.items.cnew)

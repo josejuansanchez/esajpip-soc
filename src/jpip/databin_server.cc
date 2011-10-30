@@ -221,7 +221,7 @@ namespace jpip
             else if(res > 0) {
 
             	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
-            	  cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+            	  //cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
 
 #ifdef CLASSIC
             	  if (current_idx != range.last) {
@@ -238,7 +238,7 @@ namespace jpip
             	} else {
 #ifdef CLASSIC
                     if(!woi_composer[current_idx].GetNextPacket()) {
-                      cout << dec << "\t[" << current_idx << "] ****" << endl;
+                      //cout << dec << "\t[" << current_idx << "] ****" << endl;
                       if (current_idx != range.last) {
                         current_idx++;
                       } else {
@@ -249,7 +249,7 @@ namespace jpip
                     }
 #else
             		if(!woi_composer[range.GetIndex(current_idx)].GetNextPacket()) {
-            		   cout << dec << "\t[" << current_idx << "] ****" << endl;
+            		   //cout << dec << "\t[" << current_idx << "] ****" << endl;
             		   if(range.GetNext(current_idx)) break;
             		   bytes_sent = 0;
             		}
