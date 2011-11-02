@@ -32,7 +32,7 @@ namespace net
 
   bool Socket::IsValid()
   {
-    PollFD poll_fd(sid, POLLERR | POLLHUP | POLLNVAL);
+    PollFD poll_fd(sid, POLLRDHUP | POLLERR | POLLHUP | POLLNVAL);
     return (poll(&poll_fd, 1, 0) == 0);
   }
 
