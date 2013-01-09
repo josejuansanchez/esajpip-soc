@@ -22,6 +22,8 @@ private:
   AppInfo& app_info;			///< Application run-time information
   IndexManager& index_manager;	///< Index manager
 
+  long totalBytes;
+
 public:
   /**
    * Initializes the object.

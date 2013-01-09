@@ -119,9 +119,14 @@ namespace jpip
       }
     }
     else if (param == "mbw") {
-		if((stream >> x >> c)) {
+		if((stream >> x)) {
 		  max_bandwidth = x;
-		  unit_bandwidth = c;
+		  if (stream.peek() != '&'){
+		    stream >> c;
+		    unit_bandwidth = c;
+		  } else {
+		    unit_bandwidth = '0';
+		  }
 		  mask.items.mbw = 1;
 	      TRACE("JPIP parameter: mbw=" << max_bandwidth << unit_bandwidth);
 		}

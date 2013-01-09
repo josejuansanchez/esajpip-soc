@@ -115,8 +115,12 @@ namespace jpip
     		  	    break;
     	  case 'K': bytes = req.max_bandwidth << 10;
     		  	    break;
+    	  default: bytes = req.max_bandwidth;
     	}
     	bytes_per_frame = (bytes >> 3) / req.sampling_rate;
+
+	// PRUEBA
+	cout << "req.max_bandwidth: " << req.max_bandwidth << "\treq.unit: " << req.unit_bandwidth << "\tBytes: " << bytes <<  "\tBytes per frame: " << bytes_per_frame << endl;
 
     	if (bytes_per_frame < MIN_BYTES_PER_FRAME) bytes_per_frame = MIN_BYTES_PER_FRAME;
 
@@ -221,7 +225,7 @@ namespace jpip
             else if(res > 0) {
 
             	if ((bytes_per_frame != -1) && (bytes_sent >= bytes_per_frame)) {
-            	  //cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
+            	  cout << "[" << current_idx << "][bytes_sent >= bytes_per_frame] " << bytes_sent << " >= " << bytes_per_frame << endl;
 
 #ifdef CLASSIC
             	  if (current_idx != range.last) {

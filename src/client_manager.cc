@@ -24,6 +24,10 @@ void ClientManager::Run(ClientInfo *client_info)
   int chunk_len = 0;
   int buf_len = cfg.max_chunk_size();
 
+  /***/
+  totalBytes = 0;
+  /***/
+
   char *buf = new char[buf_len];
 
   if(buf == NULL) {
@@ -189,6 +193,11 @@ void ClientManager::Run(ClientInfo *client_info)
 
           //LOG("Chunk of " << chunk_len << " bytes sent");
           sock_stream->Send(buf, chunk_len);
+
+	  /***/
+	  totalBytes += chunk_len;
+	  //LOG("TotalBytes: " << totalBytes << " bytes_sent [ " << channel << " ]");
+	  /***/
 
           sock_stream << http::Protocol::CRLF << flush;
         }
